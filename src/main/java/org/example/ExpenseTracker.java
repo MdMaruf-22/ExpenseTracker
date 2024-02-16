@@ -2,6 +2,8 @@ package org.example;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class ExpenseTracker {
@@ -30,22 +32,26 @@ public class ExpenseTracker {
             e.printStackTrace();
         }
     }
-    public void viewExpenses() {
+    public List<String> viewExpenses() {
+        List<String> expensesList = new ArrayList<>();
         String sql = "SELECT * FROM expenses";
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                System.out.println("ID: " + rs.getInt("id") +
+                String expense = "ID: " + rs.getInt("id") +
                         ", Amount: " + rs.getDouble("amount") +
                         ", Description: " + rs.getString("description") +
-                        ", Date: " + rs.getString("date"));
+                        ", Date: " + rs.getString("date");
+                expensesList.add(expense);
             }
         } catch (SQLException e) {
             System.out.println("Error viewing expenses.");
             e.printStackTrace();
         }
+        return expensesList;
     }
+
     public static void main(String[] args) {
         String url = "jdbc:mysql://localhost:3306/expense_tracker";
         String userName = "root";
