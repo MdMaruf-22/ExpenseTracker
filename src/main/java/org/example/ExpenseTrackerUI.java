@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ExpenseTrackerUI extends JFrame {
     private ExpenseTracker expenseTracker;
@@ -20,7 +22,7 @@ public class ExpenseTrackerUI extends JFrame {
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(4, 1));
+        mainPanel.setLayout(new GridLayout(5, 1));
 
         JLabel titleLabel = new JLabel("Expense Tracker");
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -52,6 +54,18 @@ public class ExpenseTrackerUI extends JFrame {
         });
         mainPanel.add(viewExpensesButton);
 
+        JButton viewTotalExpensesButton = new JButton("View Total Expenses for Today");
+        viewTotalExpensesButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String today = dateFormat.format(new Date());
+                double totalExpenses = expenseTracker.getTotalExpensesForDate(today);
+                JOptionPane.showMessageDialog(null, "Total expenses for today: $" + totalExpenses, "Total Expenses", JOptionPane.PLAIN_MESSAGE);
+            }
+        });
+        mainPanel.add(viewTotalExpensesButton);
+
         JButton exitButton = new JButton("Exit");
         exitButton.addActionListener(new ActionListener() {
             @Override
@@ -77,4 +91,5 @@ public class ExpenseTrackerUI extends JFrame {
         });
     }
 }
+
 

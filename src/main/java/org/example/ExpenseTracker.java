@@ -51,7 +51,22 @@ public class ExpenseTracker {
         }
         return expensesList;
     }
-
+    public double getTotalExpensesForDate(String date) {
+        double totalExpenses = 0.0;
+        String sql = "SELECT SUM(amount) AS total FROM expenses WHERE date = ?";
+        try {
+            PreparedStatement prst = conn.prepareStatement(sql);
+            prst.setString(1, date);
+            ResultSet rs = prst.executeQuery();
+            if (rs.next()) {
+                totalExpenses = rs.getDouble("total");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error calculating total expenses for date.");
+            e.printStackTrace();
+        }
+        return totalExpenses;
+    }
     public static void main(String[] args) {
         String url = "jdbc:mysql://localhost:3306/expense_tracker";
         String userName = "root";
