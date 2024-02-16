@@ -2,9 +2,7 @@ package org.example;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class ExpenseTracker {
     private Connection conn;
@@ -51,56 +49,44 @@ public class ExpenseTracker {
         }
         return expensesList;
     }
-    public double getTotalExpensesForDate(String date) {
+    public Map<String, Double> getTotalExepnseOfToday(String date) {
+        Map<String, Double> expensesAndDescriptions = new HashMap<>();
+        String sql = "SELECT description, amount FROM expenses WHERE date = ?";
         double totalExpenses = 0.0;
-        String sql = "SELECT SUM(amount) AS total FROM expenses WHERE date = ?";
         try {
             PreparedStatement prst = conn.prepareStatement(sql);
             prst.setString(1, date);
             ResultSet rs = prst.executeQuery();
-            if (rs.next()) {
-                totalExpenses = rs.getDouble("total");
+            while (rs.next()) {
+                String description = rs.getString("description");
+                double amount = rs.getDouble("amount");
+                totalExpenses += amount;
+                expensesAndDescriptions.put(description, amount);
             }
+            expensesAndDescriptions.put("Total Expenses", totalExpenses);
         } catch (SQLException e) {
-            System.out.println("Error calculating total expenses for date.");
+            System.out.println("Error retrieving expenses for date.");
             e.printStackTrace();
         }
-        return totalExpenses;
+        return expensesAndDescriptions;
     }
-    public static void main(String[] args) {
-        String url = "jdbc:mysql://localhost:3306/expense_tracker";
-        String userName = "root";
-        String passWord = "";
-        ExpenseTracker et = new ExpenseTracker(url,userName,passWord);
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            System.out.println("1. Add Expense");
-            System.out.println("2. View Expenses");
-            System.out.println("3. Exit");
-            System.out.print("Choose an option: ");
-            int choice = scanner.nextInt();
-            switch (choice) {
-                case 1:
-                    System.out.print("Enter expense amount: ");
-                    double amount = scanner.nextDouble();
-                    scanner.nextLine();
-                    System.out.print("Enter expense description: ");
-                    String description = scanner.nextLine();
-                    et.addExpense(amount, description);
-                    break;
-                case 2:
-                    et.viewExpenses();
-                    break;
-                case 3:
-                    System.out.println("Exiting...");
-                    System.exit(0);
-                default:
-                    System.out.println("Invalid choice!");
-            }
-        }
-    }
+
     private String getCurrentDate(){
         LocalDate currDate = LocalDate.now();
         return  currDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
+
+    public void addMoney(double amount) {
+        String sql = "INSERT INTO credit (amount,date) VALUES (?,?)";
+        try{
+            PreparedStatement prst = conn.prepareStatement(sql);
+            prst.setDouble(1,amount);
+            prst.setString(2,getCurrentDate());
+            prst.executeUpdate();
+        }
+        catch (SQLException e){
+            System.out.println("Error in crediting.");
+            e.printStackTrace();
+        }
     }
 }

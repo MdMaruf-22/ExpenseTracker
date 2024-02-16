@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 public class ExpenseTrackerUI extends JFrame {
     private ExpenseTracker expenseTracker;
@@ -18,11 +19,11 @@ public class ExpenseTrackerUI extends JFrame {
     private void createUI() {
         setTitle("Expense Tracker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 300);
+        setSize(400, 400);
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(5, 1));
+        mainPanel.setLayout(new GridLayout(6, 1));
 
         JLabel titleLabel = new JLabel("Expense Tracker");
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -60,12 +61,32 @@ public class ExpenseTrackerUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 String today = dateFormat.format(new Date());
-                double totalExpenses = expenseTracker.getTotalExpensesForDate(today);
-                JOptionPane.showMessageDialog(null, "Total expenses for today: $" + totalExpenses, "Total Expenses", JOptionPane.PLAIN_MESSAGE);
+
+                Map<String, Double> expensesAndDescriptions = expenseTracker.getTotalExepnseOfToday(today);
+
+                StringBuilder message = new StringBuilder("Total expenses for today: $" + expensesAndDescriptions.get("Total Expenses") + "\n\n");
+
+                for (Map.Entry<String, Double> entry : expensesAndDescriptions.entrySet()) {
+                    if (!entry.getKey().equals("Total Expenses")) {
+                        message.append(entry.getKey()).append(": $").append(entry.getValue()).append("\n");
+                    }
+                }
+                JOptionPane.showMessageDialog(null, message.toString(), "Total Expenses", JOptionPane.PLAIN_MESSAGE);
             }
         });
-        mainPanel.add(viewTotalExpensesButton);
 
+        mainPanel.add(viewTotalExpensesButton);
+        JButton addCreditButton = new JButton("Add Money");
+        addCreditButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String amount = JOptionPane.showInputDialog("Enter the amount:");
+                double dblAmount = Double.parseDouble(amount);
+                expenseTracker.addMoney(dblAmount);
+                JOptionPane.showMessageDialog(null,"Money Added Successfully!");
+            }
+        });
+        mainPanel.add(addCreditButton);
         JButton exitButton = new JButton("Exit");
         exitButton.addActionListener(new ActionListener() {
             @Override
@@ -78,7 +99,6 @@ public class ExpenseTrackerUI extends JFrame {
         add(mainPanel);
         setVisible(true);
     }
-
     public static void main(String[] args) {
         String url = "jdbc:mysql://localhost:3306/expense_tracker";
         String userName = "root";
